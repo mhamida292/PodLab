@@ -59,6 +59,22 @@ Everything tunable lives in `config.js`:
 | `generate-icons.js` | Generates placeholder PNG app icons |
 | `public/` | The PWA (HTML, JS, CSS, service worker, manifest, icons) |
 
+## Roadmap / planned features
+
+- [ ] **Fix logo** — replace the generated placeholder "Q" icon with real artwork.
+- [ ] **Better media player** — a richer, more capable player UI.
+- [ ] **App redesign** — overall visual/UX overhaul.
+- [ ] **Multi-podcast categorization** — extend the categorizer to handle other
+      podcasts (beyond Qalam) that the user follows.
+
+### Known bugs
+
+- [ ] **iPhone lock-screen player:** podcast/series name does not show up in the
+      iOS now-playing player.
+- [ ] **Skip buttons mislabeled:** the "forward" control is labeled 10 seconds but
+      actually skips 30 seconds. (Player notes say 10s but it moves 30s.) Reconcile
+      the button labels with the actual seek amounts.
+
 ## Notes
 
 - App icons are generated placeholders — swap in real artwork when you like.
