@@ -1,0 +1,12 @@
+services:
+  podlab:
+    build: .
+    image: podlab:latest
+    container_name: podlab
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      # Override the feed without rebuilding, if you want:
+      # - FEED_URL=https://feeds.feedburner.com/QalamPodcast

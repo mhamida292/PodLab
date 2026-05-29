@@ -1,0 +1,12 @@
+{
+  "name": "podlab",
+  "version": "0.1.0",
+  "description": "PodLab — a self-hosted PWA podcast listener that auto-categorizes an RSS feed into series.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
