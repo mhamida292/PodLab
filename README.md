@@ -26,7 +26,7 @@ one feed that contains many series — but the feed URL is configurable.
 docker compose up -d --build
 ```
 
-Then open `http://<homelab-host>:3000`. On your iPhone (over Tailscale): open that
+Then open `http://<homelab-host>:9090`. On your iPhone (over Tailscale): open that
 URL in Safari → **Share → Add to Home Screen**, and launch it from the icon for
 background audio + lock-screen controls.
 

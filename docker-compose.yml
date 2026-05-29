@@ -5,8 +5,8 @@ services:
     container_name: podlab
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "9090:9090"
     environment:
-      - PORT=3000
+      - PORT=9090
       # Override the feed without rebuilding, if you want:
       # - FEED_URL=https://feeds.feedburner.com/QalamPodcast

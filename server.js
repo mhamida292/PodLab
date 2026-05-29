@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { getFeed } from "./feed.js";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "public");
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 9090;
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
