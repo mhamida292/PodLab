@@ -178,7 +178,30 @@ function openPodcastMenu(id) {
     closeSheet(); await load(true);
   });
 }
-function renderSearch() { view.innerHTML = `<h1 class="view-title">Search</h1>`; }
+let searchQuery = "";
+
+function renderSearch() {
+  view.innerHTML = `
+    <input id="searchBox" class="search" type="search" placeholder="Search podcasts, series, episodes…" value="${esc(searchQuery)}" />
+    <div id="searchResults"></div>`;
+  const box = $("#searchBox");
+  box.addEventListener("input", () => { searchQuery = box.value; renderSearchResults(); });
+  renderSearchResults();
+  box.focus();
+}
+
+function renderSearchResults() {
+  const out = $("#searchResults");
+  const q = searchQuery.trim();
+  if (!q) { out.innerHTML = `<div class="loading">Type to search your podcasts.</div>`; return; }
+  const groups = Select.searchEpisodes(DATA, q);
+  if (groups.length === 0) { out.innerHTML = `<div class="loading">No matches.</div>`; return; }
+  out.innerHTML = groups.map((g) => `
+    <div class="search-group"><div class="shelf-h mono">${esc(g.podcast.name)}</div>
+      <div class="ep-list">${g.matches.slice(0, 25).map(epRow).join("")}</div></div>`).join("");
+  out.querySelectorAll("[data-id]").forEach((el) =>
+    el.addEventListener("click", () => play(findEp(el.dataset.id))));
+}
 
 let hidePlayed = false;
 
