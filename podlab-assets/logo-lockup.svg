@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 32" width="190" height="32">
+  <g transform="translate(0 6) scale(0.82)">
+  <rect x="6" y="13" width="3.4" height="6" rx="1.7" fill="#9e4b6a"></rect>
+  <rect x="11.3" y="9" width="3.4" height="14" rx="1.7" fill="#9e4b6a"></rect>
+  <rect x="16.6" y="6" width="3.4" height="20" rx="1.7" fill="#9e4b6a"></rect>
+  <rect x="21.9" y="10" width="3.4" height="12" rx="1.7" fill="#9e4b6a"></rect>
+  <rect x="27.2" y="14" width="3.4" height="4" rx="1.7" fill="#9e4b6a"></rect></g>
+  <text x="34" y="22" font-family="JetBrains Mono, monospace" font-weight="500" font-size="14" letter-spacing="2.4" fill="#9e4b6a">PODLAB</text>
+</svg>
