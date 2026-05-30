@@ -13,13 +13,19 @@ one feed that contains many series — with support for additional podcasts adde
 - **Auto-categorization** — episodes are sorted into series from RSS title patterns
   and category tags (speakers and noise tags are filtered out). Unmatched episodes
   fall into a `Misc` bucket.
+- **Rose redesign** — refreshed visual identity with a rose/pink accent palette and
+  polished typography throughout.
+- **Light / dark theme** — auto-detects system preference with a manual toggle to
+  override; preference is persisted.
+- **Responsive navigation** — bottom tab bar on mobile, collapsible sidebar on desktop.
+- **Home feed** — continue-listening hero card + recent-episodes list on the default tab.
+- **Library** — add / remove podcasts and browse series with in-app grouping.
+- **Dedicated search tab** — search across all podcasts, series, and episodes at once.
 - **Native audio playback** with play/pause, scrub, ±15s/30s, and a persistent
   mini-player.
 - **Resume playback** — position and last-played episode sync through the server
   (source of truth) with a local cache; your progress follows you across devices.
-- **Continue-listening shelf** — jump back into in-progress episodes from any device.
 - **Played/watched marking** — mark episodes as played with an option to hide them.
-- **Global search** — search across all podcasts, series, and episodes at once.
 - **iOS lock-screen controls** via the MediaSession API.
 - **Installable PWA** with an offline app shell (audio + feed are always live).
 - **Zero runtime dependencies** — just Node's standard library.
@@ -75,15 +81,26 @@ the server logs a warning and keeps state in memory rather than crashing.)
 | `config.js` | Categorization profiles + seed podcasts |
 | `generate-icons.js` | Generates placeholder PNG app icons |
 | `public/` | The PWA (HTML, JS, CSS, service worker, manifest, icons) |
+| `public/app.js` | Tab routing + view rendering (Home / Library / Search) |
 | `public/state.js` | Frontend playback sync layer (server-backed with local cache) |
+| `public/select.js` | Pure data selectors: recent episodes, in-progress list, search |
+| `public/theme.js` | Theme state: resolves auto / light / dark and persists preference |
 
 ## Roadmap / planned features
 
-- [ ] **Fix logo** — replace the generated placeholder "Q" icon with real artwork.
+- [x] **Fix logo** — real equalizer-mark icon set wired in (192 / 512 PNG + SVG favicon + Apple touch icon).
+- [x] **App redesign** — rose-palette redesign with light/dark theme, responsive tab/sidebar nav, Home feed, Library, and Search.
 - [ ] **Better media player** — a richer, more capable player UI.
-- [ ] **App redesign** — overall visual/UX overhaul.
 - [x] **Multi-podcast categorization** — extend the categorizer to handle other
       podcasts (beyond Qalam) that the user follows.
+
+### Deferred / next (player phase)
+
+- Playback speed control
+- Sleep timer
+- Seek bar redesign
+- iOS lock-screen series name (now-playing metadata)
+- 15 s back / 30 s forward skip UX decision (labels vs. symmetry)
 
 ### Known bugs
 
@@ -95,7 +112,6 @@ the server logs a warning and keeps state in memory rather than crashing.)
 
 ## Notes
 
-- App icons are generated placeholders — swap in real artwork when you like.
 - Audio streams directly from the podcast's CDN, not proxied through the server.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

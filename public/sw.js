@@ -7,11 +7,16 @@ const SHELL = [
   "/styles.css",
   "/app.js",
   "/state.js",
+  "/select.js",
+  "/theme.js",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
   "/icons/favicon.svg",
   "/icons/apple-touch-icon.png",
+  // favicon-16/32 and the maskable icon variants are intentionally omitted:
+  // the SVG favicon covers modern browsers and the maskables are fetched lazily
+  // at PWA-install time, so they don't need to be in the offline shell.
 ];
 
 self.addEventListener("install", (e) => {
