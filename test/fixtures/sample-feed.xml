@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>Test Podcast</title>
+    <description>Fixture feed</description>
+    <itunes:image href="https://example.com/art.jpg"/>
+    <item>
+      <title>The Cure: Episode 1</title>
+      <guid>g-cure-1</guid>
+      <category>Podcast</category>
+      <category>Shaykh Test Speaker</category>
+      <enclosure url="https://cdn.example.com/cure1.mp3" type="audio/mpeg"/>
+      <itunes:duration>40:00</itunes:duration>
+      <pubDate>Mon, 05 May 2025 10:00:00 GMT</pubDate>
+      <description><![CDATA[<p>Notes one.</p>]]></description>
+    </item>
+    <item>
+      <title>The Cure: Episode 2</title>
+      <guid>g-cure-2</guid>
+      <enclosure url="https://cdn.example.com/cure2.mp3" type="audio/mpeg"/>
+      <itunes:duration>41:00</itunes:duration>
+      <pubDate>Tue, 06 May 2025 10:00:00 GMT</pubDate>
+      <description>Notes two.</description>
+    </item>
+    <item>
+      <title>Khutbah on Patience</title>
+      <guid>g-khutbah-1</guid>
+      <enclosure url="https://cdn.example.com/khutbah1.mp3" type="audio/mpeg"/>
+      <itunes:duration>20:00</itunes:duration>
+      <pubDate>Wed, 07 May 2025 10:00:00 GMT</pubDate>
+      <description>Khutbah notes.</description>
+    </item>
+  </channel>
+</rss>
