@@ -2,7 +2,6 @@
 import * as State from "/state.js";
 
 const $ = (s) => document.querySelector(s);
-const view = $("#view");
 const list = $("#list");
 const homeExtras = $("#home-extras");
 const titleEl = $("#title");
@@ -71,7 +70,7 @@ function renderHome() {
   $("#addTile").addEventListener("click", addPodcastFlow);
 }
 function epCount(p) {
-  const n = p.mode === "series" ? p.episodes.length : p.episodes.length;
+  const n = p.episodes.length;
   return `${n} episode${n === 1 ? "" : "s"}`;
 }
 
