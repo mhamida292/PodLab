@@ -1,6 +1,6 @@
 // Minimal service worker: cache the app shell so the PWA opens offline.
 // Audio + the /api/* JSON endpoints are always fetched live (network-first).
-const CACHE = "podlab-shell-v2";
+const CACHE = "podlab-shell-v3";
 const SHELL = [
   "/",
   "/index.html",
@@ -10,6 +10,8 @@ const SHELL = [
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",
+  "/icons/favicon.svg",
+  "/icons/apple-touch-icon.png",
 ];
 
 self.addEventListener("install", (e) => {
