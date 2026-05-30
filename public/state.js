@@ -78,7 +78,10 @@ async function flush() {
       method: "PUT",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ episodeId, ...rec, updatedAt: rec.updatedAt || Date.now() }),
-    }).catch(() => pending.set(episodeId, rec)); // re-queue on failure
+    }).catch(() => { // re-queue on failure and ensure a retry is scheduled
+      pending.set(episodeId, rec);
+      if (!flushTimer) flushTimer = setTimeout(flush, 4000);
+    });
   }
 }
 // Flush promptly when the tab is hidden / closed.
