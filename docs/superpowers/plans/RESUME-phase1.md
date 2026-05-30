@@ -15,12 +15,12 @@
 | T3 — categorize.js profile-aware | ✅ done & reviewed |
 | T4 — store.js persistent state | ✅ done & reviewed |
 | T5 — feed.js multi-feed | ✅ done & reviewed (+ bugfix commit) |
-| **T6 — server.js API** | ⏭️ **NEXT — not started** |
-| T7 — public/state.js sync layer | ⬜ pending |
-| T8 — podcast grid + nav + add flow | ⬜ pending |
-| T9 — synced playback + continue-listening | ⬜ pending |
-| T10 — search | ⬜ pending |
-| T11 — docs + docker state volume | ⬜ pending |
+| T6 — server.js API | ✅ done & reviewed (+ review-fix commit 1170d1b) |
+| T7 — public/state.js sync layer | ✅ done & reviewed (+ review-fix commit 388ec8c) |
+| T8+T9+T10 — frontend (app.js) | ✅ done & reviewed (ec569d0 + cleanup 69b141f); smoke-booted OK |
+| T11 — docs + docker state volume | ✅ done & verified (d55e729); +Dockerfile store.js/healthcheck/data-dir fixes |
+
+**ALL 11 TASKS COMPLETE.** Pending: final whole-branch review, then finishing-a-development-branch (merge/PR decision).
 
 **Test suite:** green — 16 tests (6 categorize + 7 store + 3 feed). Run `npm test`.
 
