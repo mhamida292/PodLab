@@ -31,38 +31,62 @@
   <title>PodLab</title>
 </head>
 <body>
-  <header class="topbar">
-    <button id="backBtn" class="back hidden" aria-label="Back">‹</button>
-    <h1 id="title">PodLab</h1>
-    <button id="refreshBtn" class="icon-btn" aria-label="Refresh">⟳</button>
-  </header>
+  <div id="app" class="app">
+    <!-- Sidebar (desktop) -->
+    <nav id="sidebar" class="sidebar" aria-label="Main navigation">
+      <div class="lockup">
+        <svg class="mark" viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+          <rect x="6" y="13" width="3.4" height="6" rx="1.7"/><rect x="11.3" y="9" width="3.4" height="14" rx="1.7"/>
+          <rect x="16.6" y="6" width="3.4" height="20" rx="1.7"/><rect x="21.9" y="10" width="3.4" height="12" rx="1.7"/>
+          <rect x="27.2" y="14" width="3.4" height="4" rx="1.7"/>
+        </svg>
+        <span class="wordmark">PODLAB</span>
+      </div>
+      <button class="nav-item" data-tab="home"><span class="ni-ic">▦</span> Home</button>
+      <button class="nav-item" data-tab="search"><span class="ni-ic">⌕</span> Search</button>
+      <button class="nav-item" data-tab="library"><span class="ni-ic">▤</span> Library</button>
+      <div class="sidebar-spacer"></div>
+      <button id="addBtnSide" class="btn-accent">+ Add podcast</button>
+    </nav>
 
-  <main id="view" class="view">
-    <div id="home-extras" class="home-extras hidden">
-      <input id="search" class="search" type="search" placeholder="Search podcasts, series, episodes…" />
-      <div id="continue" class="continue hidden"></div>
-    </div>
-    <div id="list"><div class="loading">Loading…</div></div>
-  </main>
+    <div class="frame">
+      <!-- Top bar (mobile) -->
+      <header id="topbar" class="topbar">
+        <button id="backBtn" class="iconbtn back hidden" aria-label="Back">‹</button>
+        <div class="lockup">
+          <svg class="mark" viewBox="0 0 32 32" width="20" height="20" aria-hidden="true">
+            <rect x="6" y="13" width="3.4" height="6" rx="1.7"/><rect x="11.3" y="9" width="3.4" height="14" rx="1.7"/>
+            <rect x="16.6" y="6" width="3.4" height="20" rx="1.7"/><rect x="21.9" y="10" width="3.4" height="12" rx="1.7"/>
+            <rect x="27.2" y="14" width="3.4" height="4" rx="1.7"/>
+          </svg>
+          <span class="wordmark">PODLAB</span>
+        </div>
+        <button id="settingsBtn" class="iconbtn" aria-label="Settings">◐</button>
+      </header>
 
-  <!-- Persistent mini player -->
-  <footer id="player" class="player hidden">
-    <div class="player-meta">
-      <div id="pTitle" class="p-title">Nothing playing</div>
-      <div id="pSeries" class="p-series"></div>
+      <main id="view" class="view"><div class="loading">Loading…</div></main>
+
+      <!-- Mini player -->
+      <footer id="player" class="player hidden">
+        <div class="mini" id="miniPlayer">
+          <div id="miniArt" class="mini-art"></div>
+          <div class="mini-meta"><div id="miniTitle" class="mini-title">—</div><div id="miniPod" class="mini-pod"></div></div>
+          <button id="miniPlay" class="iconbtn accent" aria-label="Play/Pause">❚❚</button>
+        </div>
+      </footer>
+
+      <!-- Bottom tab bar (mobile) -->
+      <nav id="tabbar" class="tabbar" aria-label="Tabs">
+        <button class="tab" data-tab="home"><span class="tab-ic">▦</span><span>Home</span></button>
+        <button class="tab" data-tab="search"><span class="tab-ic">⌕</span><span>Search</span></button>
+        <button class="tab" data-tab="library"><span class="tab-ic">▤</span><span>Library</span></button>
+      </nav>
     </div>
-    <div class="player-controls">
-      <button id="back15" class="ctl" aria-label="Back 15s">⟲15</button>
-      <button id="playPause" class="ctl play" aria-label="Play/Pause">▶</button>
-      <button id="fwd30" class="ctl" aria-label="Forward 30s">30⟳</button>
-    </div>
-    <div class="seek">
-      <span id="cur" class="t">0:00</span>
-      <input id="scrub" class="scrub" type="range" min="0" max="100" value="0" step="0.1" />
-      <span id="dur" class="t">0:00</span>
-    </div>
-    <audio id="audio" preload="metadata"></audio>
-  </footer>
+  </div>
+
+  <!-- Sheets (hidden until opened) -->
+  <div id="sheet" class="sheet-backdrop hidden"><div id="sheetBody" class="sheet"></div></div>
+  <audio id="audio" preload="metadata"></audio>
 
   <script src="/app.js" type="module"></script>
 </body>
