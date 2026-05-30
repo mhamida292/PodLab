@@ -58,9 +58,11 @@ Everything tunable lives in `config.js`:
 There is no top-level `FEED_URL` env var — podcast subscriptions are stored in
 `data/state.json` (path overridable via the `STATE_FILE` env var).
 
-When running with Docker, `data/state.json` is persisted via the `./data` volume
-mount in `docker-compose.yml`, so podcasts and playback positions survive container
-recreation.
+When running with Docker, state is persisted in the named `podlab-data` volume
+(see `docker-compose.yml`), so podcasts and playback positions survive container
+recreation. A named volume is used instead of a host bind mount so the non-root
+container user can always write it. (If the data directory is ever not writable,
+the server logs a warning and keeps state in memory rather than crashing.)
 
 ## Project layout
 

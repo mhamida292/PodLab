@@ -7,8 +7,15 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./data:/app/data
+      # Named volume (not a host bind mount): Docker initialises it from the
+      # image's /app/data, which is owned by the non-root `node` user, so the
+      # container can always write state.json. A host bind mount would inherit
+      # the host dir's ownership (often root) and crash the seed write on boot.
+      - podlab-data:/app/data
     environment:
       - PORT=9090
-      # Podcast state (subscriptions + playback) persists to ./data/state.json.
-      # Add or remove podcasts at runtime in the app UI — no rebuild needed.
+      # Podcast state (subscriptions + playback) persists to the podlab-data
+      # volume. Add or remove podcasts at runtime in the app UI — no rebuild.
+
+volumes:
+  podlab-data:

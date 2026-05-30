@@ -13,6 +13,7 @@ function emptyState() {
 
 export function createStore({ file, seed = [] } = {}) {
   let state = null;
+  let persistWarned = false;
 
   async function load() {
     try {
@@ -37,12 +38,25 @@ export function createStore({ file, seed = [] } = {}) {
     }
   }
 
-  // Atomic write: temp file + rename.
+  // Atomic write: temp file + rename. A write failure (e.g. an unwritable
+  // data dir / root-owned Docker bind mount) must NOT crash the server — we
+  // keep state in memory and warn once so the operator can fix the mount.
   async function persist() {
-    await mkdir(dirname(file), { recursive: true });
-    const tmp = file + ".tmp";
-    await writeFile(tmp, JSON.stringify(state, null, 2));
-    await rename(tmp, file);
+    try {
+      await mkdir(dirname(file), { recursive: true });
+      const tmp = file + ".tmp";
+      await writeFile(tmp, JSON.stringify(state, null, 2));
+      await rename(tmp, file);
+    } catch (err) {
+      if (!persistWarned) {
+        persistWarned = true;
+        console.error(
+          `[store] WARNING: could not write state to ${file} (${err.code || err.message}). ` +
+            `State is kept in memory but will NOT survive a restart — ` +
+            `ensure the data directory is writable by this process.`
+        );
+      }
+    }
   }
 
   const loaded = load();
