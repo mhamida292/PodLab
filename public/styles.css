@@ -173,3 +173,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .np-controls { display: flex; align-items: center; justify-content: center; gap: 26px; margin-bottom: 16px; }
 .np-ctl { background: none; border: none; color: var(--text); font-size: 14px; }
 .np-play { width: 56px; height: 56px; border-radius: 50%; background: var(--accent); color: var(--on-accent); border: none; font-size: 18px; }
+
+/* ---------- Settings sheet ---------- */
+.set-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 10px 0 8px; }
+.seg-group { display: flex; gap: 8px; margin-bottom: 6px; }
+.seg { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 13px; }
+.seg.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }

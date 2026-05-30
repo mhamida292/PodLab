@@ -375,6 +375,26 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !sheetEl.classList.contains("hidden")) closeSheet();
 });
 
+// ---------- settings ----------
+function openSettings() {
+  const pref = Theme.getStored();
+  const opt = (val, label) => `<button class="seg ${pref === val ? "on" : ""}" data-theme="${val}">${label}</button>`;
+  openSheet(`
+    <h2 class="sheet-title">Settings</h2>
+    <div class="set-label">Theme</div>
+    <div class="seg-group">${opt("auto", "Auto")}${opt("light", "Light")}${opt("dark", "Dark")}</div>
+    <div class="set-label">About</div>
+    <p class="add-msg">PodLab · multi-podcast PWA. Feed refresh runs in the background.</p>
+    <button class="sheet-row cancel" id="setClose">Close</button>`);
+  $("#setClose").addEventListener("click", closeSheet);
+  $("#sheetBody").querySelectorAll("[data-theme]").forEach((el) =>
+    el.addEventListener("click", () => { Theme.setTheme(el.dataset.theme); openSettings(); }));
+}
+
+$("#settingsBtn").addEventListener("click", openSettings);
+$("#settingsBtnSide").addEventListener("click", openSettings);
+$("#addBtnSide").addEventListener("click", addPodcastFlow);
+
 // ---------- add podcast ----------
 async function addPodcastFlow() {
   openSheet(`
