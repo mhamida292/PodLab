@@ -115,3 +115,51 @@ body {
 .seek { grid-area: seek; display: flex; align-items: center; gap: 10px; }
 .t { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; width: 38px; text-align: center; }
 .scrub { flex: 1; accent-color: var(--accent); height: 4px; }
+
+/* Home extras */
+.home-extras { margin-bottom: 14px; }
+.search {
+  width: 100%; background: var(--surface); border: 1px solid #ffffff14;
+  border-radius: 12px; padding: 11px 13px; color: var(--text); font-size: 14px;
+}
+.continue { margin-top: 14px; }
+.continue.hidden { display: none; }
+.continue h2 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }
+.continue-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+.continue-item {
+  flex: 0 0 200px; background: var(--surface); border: 1px solid #ffffff0d;
+  border-radius: 12px; padding: 11px; cursor: pointer;
+}
+.continue-item .ci-pod { color: var(--muted); font-size: 11px; }
+.continue-item .ci-title { font-size: 13px; font-weight: 600; margin: 4px 0 8px; }
+
+/* Podcast grid */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.tile { background: var(--surface); border: 1px solid #ffffff0d; border-radius: var(--radius); overflow: hidden; cursor: pointer; }
+.tile:active { background: var(--surface-2); }
+.tile-art {
+  aspect-ratio: 1; background-size: cover; background-position: center;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 700; color: #fff; background-color: var(--accent-2);
+}
+.tile-art.plus { background: var(--surface-2); color: var(--muted); }
+.tile-cap { padding: 10px 11px 12px; }
+.tile-name { font-weight: 650; font-size: 14px; line-height: 1.25; }
+.tile-name.muted { color: var(--muted); }
+.tile-meta { color: var(--muted); font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 7px; }
+.tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+.tag.series { background: #4f9cf922; color: var(--accent); }
+.tag.flat { background: #ffffff12; color: var(--muted); }
+
+/* Played state + hide-played */
+.hide-played { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 13px; margin-bottom: 10px; }
+.ep.played { opacity: .55; }
+.played-toggle { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 0 4px; }
+.ep.played .played-toggle { color: var(--accent); }
+
+/* Episode row (title + played toggle) */
+.ep-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+
+/* Search results */
+.search-group { margin-bottom: 18px; }
+.search-group h2 { font-size: 13px; color: var(--muted); margin: 0 0 8px; font-weight: 600; }

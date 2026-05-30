@@ -1,11 +1,12 @@
 // Minimal service worker: cache the app shell so the PWA opens offline.
-// Audio + the /api/episodes feed are always fetched live (network-first).
-const CACHE = "qalam-shell-v1";
+// Audio + the /api/* JSON endpoints are always fetched live (network-first).
+const CACHE = "podlab-shell-v2";
 const SHELL = [
   "/",
   "/index.html",
   "/styles.css",
   "/app.js",
+  "/state.js",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
   "/icons/icon-512.png",

@@ -1,21 +1,25 @@
 # PodLab
 
-A tiny self-hosted **PWA podcast listener**. Point it at a podcast RSS feed and it
-auto-groups the episodes into series, then serves an installable app you can add to
+A tiny self-hosted **PWA podcast listener**. Add multiple podcast feeds via the UI;
+episodes are auto-grouped into series and served as an installable app you can add to
 your iPhone home screen and run behind Tailscale on your homelab.
 
 Built for the [Qalam Institute Podcast](https://feeds.feedburner.com/QalamPodcast) —
-one feed that contains many series — but the feed URL is configurable.
+one feed that contains many series — with support for additional podcasts added at runtime.
 
 ## Features
 
+- **Multiple podcasts** — add any podcast RSS feed from the app UI; no rebuild required.
 - **Auto-categorization** — episodes are sorted into series from RSS title patterns
   and category tags (speakers and noise tags are filtered out). Unmatched episodes
   fall into a `Misc` bucket.
 - **Native audio playback** with play/pause, scrub, ±15s/30s, and a persistent
   mini-player.
-- **Resume playback** — remembers your position per episode and the last episode
-  played (stored locally on the device).
+- **Resume playback** — position and last-played episode sync through the server
+  (source of truth) with a local cache; your progress follows you across devices.
+- **Continue-listening shelf** — jump back into in-progress episodes from any device.
+- **Played/watched marking** — mark episodes as played with an option to hide them.
+- **Global search** — search across all podcasts, series, and episodes at once.
 - **iOS lock-screen controls** via the MediaSession API.
 - **Installable PWA** with an offline app shell (audio + feed are always live).
 - **Zero runtime dependencies** — just Node's standard library.
@@ -42,38 +46,50 @@ npm start          # node server.js
 
 Everything tunable lives in `config.js`:
 
-- `FEED_URL` — the RSS feed (also overridable via the `FEED_URL` env var).
-- `REFRESH_MS` — how often the feed is re-fetched (default 30 min).
-- `NOISE_TAGS`, `SPEAKER_HONORIFICS`, `KNOWN_SPEAKERS`, `SERIES_ALIASES` — the
-  categorization heuristics. If a new series lands in the wrong bucket, this is
-  where you fix it.
+- `REFRESH_MS` — how often feeds are re-fetched (default 30 min).
+- `PROFILES` — categorization profiles (e.g. the tuned `qalam` profile for the
+  Qalam Institute feed, plus a `generic` fallback for all other feeds). Each
+  profile contains its own noise tags, speaker honorifics, known speakers, and
+  series aliases. To tune categorization for a feed, edit or add a profile here.
+- `SEED_PODCASTS` — the podcast(s) seeded into state on first boot (when
+  `data/state.json` does not yet exist). Additional podcasts are added at
+  runtime from the app UI.
+
+There is no top-level `FEED_URL` env var — podcast subscriptions are stored in
+`data/state.json` (path overridable via the `STATE_FILE` env var).
+
+When running with Docker, `data/state.json` is persisted via the `./data` volume
+mount in `docker-compose.yml`, so podcasts and playback positions survive container
+recreation.
 
 ## Project layout
 
 | File | Purpose |
 |------|---------|
-| `server.js` | HTTP server: serves the PWA + `/api/episodes` JSON |
-| `feed.js` | Fetches + parses the RSS feed, caches it, background-refreshes |
+| `server.js` | HTTP server: serves the PWA + `/api/podcasts` and `/api/state` JSON |
+| `store.js` | Persistent server-side state (podcasts + playback), written to `data/state.json` |
+| `feed.js` | Fetches + parses multiple RSS feeds, caches them, background-refreshes |
 | `categorize.js` | Classifies each episode into a series + speakers |
-| `config.js` | Feed URL + categorization heuristics |
+| `config.js` | Categorization profiles + seed podcasts |
 | `generate-icons.js` | Generates placeholder PNG app icons |
 | `public/` | The PWA (HTML, JS, CSS, service worker, manifest, icons) |
+| `public/state.js` | Frontend playback sync layer (server-backed with local cache) |
 
 ## Roadmap / planned features
 
 - [ ] **Fix logo** — replace the generated placeholder "Q" icon with real artwork.
 - [ ] **Better media player** — a richer, more capable player UI.
 - [ ] **App redesign** — overall visual/UX overhaul.
-- [ ] **Multi-podcast categorization** — extend the categorizer to handle other
+- [x] **Multi-podcast categorization** — extend the categorizer to handle other
       podcasts (beyond Qalam) that the user follows.
 
 ### Known bugs
 
 - [ ] **iPhone lock-screen player:** podcast/series name does not show up in the
-      iOS now-playing player.
-- [ ] **Skip buttons mislabeled:** the "forward" control is labeled 10 seconds but
-      actually skips 30 seconds. (Player notes say 10s but it moves 30s.) Reconcile
-      the button labels with the actual seek amounts.
+      iOS now-playing player. (Fix scheduled for Phase 2 player work.)
+- [x] **Skip buttons mislabeled:** ~~the "forward" control is labeled 10 seconds but
+      actually skips 30 seconds~~ — RESOLVED: button labels now match the actual
+      seek amounts (back 15s, forward 30s).
 
 ## Notes
 
