@@ -122,8 +122,12 @@ export async function getPodcastFeed(podcast, { force = false } = {}) {
     if (!refreshing.has(podcast.id)) {
       const p = refresh(podcast).finally(() => refreshing.delete(podcast.id));
       refreshing.set(podcast.id, p);
+      // Background refresh (we already have a cache to serve): swallow errors so
+      // a transient feed failure can't crash the process via unhandledRejection.
+      // The initial-load path below still awaits and surfaces the error.
+      if (cached) p.catch((e) => console.error(`[feed] refresh failed for ${podcast.id}:`, e.message));
     }
-    if (!cached) await refreshing.get(podcast.id); // no data yet: wait
+    if (!cached) await refreshing.get(podcast.id); // no data yet: wait + propagate
   }
   return caches.get(podcast.id) || { fetchedAt: 0, channel: {}, series: [], episodes: [] };
 }
