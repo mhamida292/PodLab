@@ -275,6 +275,97 @@ function wireEpisodes() {
   });
 }
 
+// ---------- playback ----------
+const player = $("#player");
+
+function play(ep) {
+  if (!ep) return;
+  if (current?.id !== ep.id) {
+    current = ep;
+    audio.src = ep.audioUrl;
+    const saved = State.getPlayback(ep.id).position;
+    audio.currentTime = saved > 5 ? saved : 0;
+    State.setLastPlayed(ep.id);
+    setMediaSession(ep);
+  }
+  player.classList.remove("hidden");
+  updatePlayerMeta();
+  // play() rejects if autoplay is blocked; resync the icon instead of leaving it unhandled.
+  audio.play().catch(() => updatePlayerMeta());
+  render();
+}
+
+function updatePlayerMeta() {
+  if (!current) return;
+  $("#miniTitle").textContent = current.title;
+  $("#miniPod").textContent = current.podcast;
+  $("#miniArt").style.cssText = artStyleById(current.podcastId);
+  const mp = $("#miniPlay"); if (mp) mp.textContent = audio.paused ? "▶" : "❚❚";
+  if ($("#npPlay")) $("#npPlay").textContent = audio.paused ? "▶" : "❚❚";
+}
+
+// mini-bar controls
+$("#miniPlay").addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
+$("#miniPlayer").addEventListener("click", openNowPlaying);
+function togglePlay() { if (!current) return; if (audio.paused) audio.play().catch(() => updatePlayerMeta()); else audio.pause(); }
+
+function openNowPlaying() {
+  if (!current) return;
+  openSheet(`
+    <div class="np">
+      <div class="np-art" style="${artStyleById(current.podcastId)}"></div>
+      <div class="np-title">${esc(current.title)}</div>
+      <div class="np-sub">${esc(current.podcast)}${current.series ? " · " + esc(current.series) : ""}</div>
+      <div class="np-seek"><span id="npCur">0:00</span>
+        <input id="npScrub" class="scrub" type="range" min="0" max="100" value="0" step="0.1" />
+        <span id="npDur">0:00</span></div>
+      <div class="np-controls">
+        <button id="npBack" class="np-ctl">⟲15</button>
+        <button id="npPlay" class="np-play">${audio.paused ? "▶" : "❚❚"}</button>
+        <button id="npFwd" class="np-ctl">30⟳</button>
+      </div>
+      <button class="sheet-row cancel" id="npClose">Close</button>
+    </div>`);
+  const scrub = $("#npScrub");
+  $("#npClose").addEventListener("click", closeSheet);
+  $("#npPlay").addEventListener("click", togglePlay);
+  $("#npBack").addEventListener("click", () => (audio.currentTime = Math.max(0, audio.currentTime - 15)));
+  $("#npFwd").addEventListener("click", () => (audio.currentTime += 30));
+  scrub.addEventListener("input", () => { npScrubbing = true; if (audio.duration) $("#npCur").textContent = fmtTime((scrub.value/100)*audio.duration); });
+  scrub.addEventListener("change", () => { if (audio.duration) audio.currentTime = (scrub.value/100)*audio.duration; npScrubbing = false; });
+  syncNowPlaying();
+}
+let npScrubbing = false;
+function syncNowPlaying() {
+  const scrub = $("#npScrub"); if (!scrub) return;
+  if (audio.duration && !npScrubbing) {
+    scrub.value = (audio.currentTime / audio.duration) * 100;
+    $("#npCur").textContent = fmtTime(audio.currentTime);
+    $("#npDur").textContent = fmtTime(audio.duration);
+  }
+}
+
+// audio events (behavior identical to Phase 1, just feeding new UI)
+audio.addEventListener("timeupdate", () => {
+  syncNowPlaying();
+  if (current && audio.currentTime > 0) State.setPosition(current.id, Math.floor(audio.currentTime));
+});
+audio.addEventListener("play", updatePlayerMeta);
+audio.addEventListener("pause", updatePlayerMeta);
+audio.addEventListener("ended", () => { if (current) State.setPlayed(current.id, true); render(); });
+
+function setMediaSession(ep) {
+  if (!("mediaSession" in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: ep.title, artist: ep.speakers?.join(", ") || ep.podcast, album: ep.series || ep.podcast,
+    artwork: [{ src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" }],
+  });
+  navigator.mediaSession.setActionHandler("play", () => audio.play());
+  navigator.mediaSession.setActionHandler("pause", () => audio.pause());
+  navigator.mediaSession.setActionHandler("seekbackward", () => (audio.currentTime -= 15));
+  navigator.mediaSession.setActionHandler("seekforward", () => (audio.currentTime += 30));
+}
+
 // ---------- sheets ----------
 const sheetEl = $("#sheet");
 function openSheet(html) { $("#sheetBody").innerHTML = html; sheetEl.classList.remove("hidden"); }
@@ -338,7 +429,18 @@ function durToSec(d) { if (!d) return 0; const p = d.split(":").map(Number);
 // ---------- boot ----------
 Theme.applyTheme();
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
-load();
+load().then(() => {
+  const lastId = State.getLastPlayed();
+  const ep = lastId && findEp(lastId);
+  if (ep) {
+    current = ep; audio.src = ep.audioUrl;
+    const saved = State.getPlayback(ep.id).position;
+    if (saved > 5) audio.currentTime = saved;
+    setMediaSession(ep);
+    player.classList.remove("hidden");
+    updatePlayerMeta();
+  }
+});
 
 // Exposed for later tasks (avoids "unused" churn): keep references alive.
 export { findEp, current, fmtTime, durToSec, fmtDate, esc };
