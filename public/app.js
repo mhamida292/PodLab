@@ -48,7 +48,7 @@ function back() {
   if (route.podcastId) return go({ podcastId: null });
 }
 
-$$(".tab,.nav-item").forEach((el) => el.addEventListener("click", () => goTab(el.dataset.tab)));
+$$("[data-tab]").forEach((el) => el.addEventListener("click", () => goTab(el.dataset.tab)));
 backBtn.addEventListener("click", back);
 
 // ---------- view stubs (filled in later tasks) ----------
