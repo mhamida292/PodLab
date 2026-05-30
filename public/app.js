@@ -179,8 +179,78 @@ function openPodcastMenu(id) {
   });
 }
 function renderSearch() { view.innerHTML = `<h1 class="view-title">Search</h1>`; }
-function renderShow(id) { const p = podcastById(id); view.innerHTML = `<h1 class="view-title">${esc(p?.name || "")}</h1>`; }
-function renderSeries(id, name) { view.innerHTML = `<h1 class="view-title">${esc(name)}</h1>`; }
+
+let hidePlayed = false;
+
+function renderShow(id) {
+  const p = podcastById(id);
+  if (!p) return goTab("library");
+  if (p.mode === "series") {
+    const cards = p.series.map((s) => `
+      <button class="series-card" data-series="${esc(s.name)}">
+        <div class="series-name">${esc(s.name)}</div>
+        <div class="series-count">${s.count} episode${s.count === 1 ? "" : "s"}</div>
+      </button>`).join("");
+    view.innerHTML = `<h1 class="view-title">${esc(p.name)}</h1><div class="series-grid">${cards}</div>`;
+    view.querySelectorAll("[data-series]").forEach((el) =>
+      el.addEventListener("click", () => go({ podcastId: id, series: el.dataset.series })));
+  } else {
+    view.innerHTML = `<h1 class="view-title">${esc(p.name)}</h1>` + episodesHtml(p.episodes);
+    wireEpisodes();
+  }
+}
+
+function renderSeries(id, name) {
+  const p = podcastById(id);
+  const s = p?.series.find((x) => x.name === name);
+  if (!s) return go({ podcastId: id, series: null });
+  view.innerHTML = `<h1 class="view-title">${esc(name)}</h1>` + episodesHtml(s.episodes);
+  wireEpisodes();
+}
+
+function episodesHtml(eps) {
+  const shown = hidePlayed ? eps.filter((e) => !State.getPlayback(e.id).played) : eps;
+  return `<label class="hide-played"><input type="checkbox" id="hidePlayedCb" ${hidePlayed ? "checked" : ""}/> Hide played</label>
+    <div class="ep-cards">${shown.map(epCard).join("")}</div>`;
+}
+
+function epCard(e) {
+  const rec = State.getPlayback(e.id);
+  const playing = current && current.id === e.id ? "playing" : "";
+  return `<div class="ep-card ${rec.played ? "played" : ""} ${playing}" data-id="${esc(e.id)}">
+    <div class="ep-head">
+      <button class="ep-open">
+        <div class="ep-title">${esc(e.title)}</div>
+        <div class="ep-sub">${fmtDate(e.pubDate)}${e.duration ? " · " + esc(e.duration) : ""}${e.speakers?.length ? " · " + esc(e.speakers.join(", ")) : ""}</div>
+      </button>
+      <button class="played-toggle" aria-label="Mark played">${rec.played ? "✓" : "○"}</button>
+    </div>
+    ${pct(e) ? `<div class="bar"><i style="width:${pct(e)}%"></i></div>` : ""}
+    <div class="ep-notes">${esc(e.notes || "No show notes.")}</div>
+  </div>`;
+}
+
+function wireEpisodes() {
+  const cb = $("#hidePlayedCb");
+  if (cb) cb.addEventListener("change", (e) => { hidePlayed = e.target.checked; render(); });
+  view.querySelectorAll(".ep-card").forEach((el) => {
+    const id = el.dataset.id;
+    el.querySelector(".ep-open").addEventListener("click", (e) => { e.stopPropagation(); el.classList.toggle("open"); });
+    el.querySelector(".played-toggle").addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rec = State.getPlayback(id);
+      State.setPlayed(id, !rec.played);
+      // Re-render to refresh played styling/filter, but keep expanded notes open.
+      const open = [...view.querySelectorAll(".ep-card.open")].map((c) => c.dataset.id);
+      render();
+      open.forEach((oid) => {
+        const c = view.querySelector(`.ep-card[data-id="${CSS.escape(oid)}"]`);
+        if (c) c.classList.add("open");
+      });
+    });
+    el.addEventListener("click", () => play(findEp(id)));
+  });
+}
 
 // ---------- sheets ----------
 const sheetEl = $("#sheet");
