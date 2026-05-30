@@ -128,10 +128,109 @@ function artStyleFor(img) {
 function pct(ep) { const total = durToSec(ep.duration); const rec = State.getPlayback(ep.id);
   return total && rec.position ? Math.min(100, (rec.position / total) * 100) : 0; }
 
-function renderLibrary() { view.innerHTML = `<h1 class="view-title">Library</h1>`; }
+function renderLibrary() {
+  const tiles = DATA.map((p) => `
+    <div class="tile" data-podcast="${esc(p.id)}">
+      <button class="tile-tap" data-open="${esc(p.id)}">
+        <div class="tile-art" style="${artStyleFor(p.image)}">${p.image ? "" : esc((p.name[0] || "?"))}</div>
+      </button>
+      <button class="tile-menu" data-menu="${esc(p.id)}" aria-label="Manage">⋯</button>
+      <div class="tile-cap">
+        <div class="tile-name">${esc(p.name)}</div>
+        <div class="tile-meta"><span class="tag ${esc(p.mode)}">${esc(p.mode)}</span> ${p.episodes.length} eps</div>
+      </div>
+    </div>`).join("");
+  const addTile = `<button class="tile add" id="libAdd">
+    <div class="tile-art plus">+</div><div class="tile-cap"><div class="tile-name muted">Add podcast</div></div></button>`;
+  view.innerHTML = `<h1 class="view-title">Library</h1><div class="grid">${tiles}${addTile}</div>`;
+
+  view.querySelectorAll("[data-open]").forEach((el) =>
+    el.addEventListener("click", () => go({ podcastId: el.dataset.open, series: null })));
+  view.querySelectorAll("[data-menu]").forEach((el) =>
+    el.addEventListener("click", (e) => { e.stopPropagation(); openPodcastMenu(el.dataset.menu); }));
+  $("#libAdd").addEventListener("click", addPodcastFlow);
+}
+
+function openPodcastMenu(id) {
+  const p = podcastById(id);
+  if (!p) return;
+  const otherMode = p.mode === "series" ? "flat" : "series";
+  openSheet(`
+    <h2 class="sheet-title">${esc(p.name)}</h2>
+    <button class="sheet-row" id="modeRow">Switch to <b>${otherMode}</b> grouping</button>
+    <button class="sheet-row danger" id="removeRow">Remove podcast</button>
+    <button class="sheet-row cancel" id="cancelRow">Cancel</button>`);
+  $("#cancelRow").addEventListener("click", closeSheet);
+  $("#modeRow").addEventListener("click", async () => {
+    try {
+      const res = await fetch(`/api/podcasts/${id}`, { method: "PATCH",
+        headers: { "content-type": "application/json" }, body: JSON.stringify({ mode: otherMode }) });
+      if (!res.ok) throw new Error("request failed");
+    } catch { alert("Couldn't switch grouping. Try again."); return; }
+    closeSheet(); await load(true);
+  });
+  $("#removeRow").addEventListener("click", async () => {
+    if (!confirm(`Remove "${p.name}"? Your playback history stays.`)) return;
+    try {
+      const res = await fetch(`/api/podcasts/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("request failed");
+    } catch { alert("Couldn't remove the podcast. Try again."); return; }
+    closeSheet(); await load(true);
+  });
+}
 function renderSearch() { view.innerHTML = `<h1 class="view-title">Search</h1>`; }
 function renderShow(id) { const p = podcastById(id); view.innerHTML = `<h1 class="view-title">${esc(p?.name || "")}</h1>`; }
 function renderSeries(id, name) { view.innerHTML = `<h1 class="view-title">${esc(name)}</h1>`; }
+
+// ---------- sheets ----------
+const sheetEl = $("#sheet");
+function openSheet(html) { $("#sheetBody").innerHTML = html; sheetEl.classList.remove("hidden"); }
+function closeSheet() { sheetEl.classList.add("hidden"); $("#sheetBody").innerHTML = ""; }
+sheetEl.addEventListener("click", (e) => { if (e.target === sheetEl) closeSheet(); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !sheetEl.classList.contains("hidden")) closeSheet();
+});
+
+// ---------- add podcast ----------
+async function addPodcastFlow() {
+  openSheet(`
+    <h2 class="sheet-title">Add a podcast</h2>
+    <input id="feedUrl" class="sheet-input" type="url" placeholder="Paste an RSS feed URL" />
+    <div id="addMsg" class="add-msg"></div>
+    <button class="btn-accent" id="addFetch">Fetch feed</button>
+    <button class="sheet-row cancel" id="addCancel">Cancel</button>`);
+  $("#addCancel").addEventListener("click", closeSheet);
+  $("#addFetch").addEventListener("click", doAddFetch);
+}
+
+async function doAddFetch() {
+  const feedUrl = $("#feedUrl").value.trim();
+  const msg = $("#addMsg");
+  const btn = $("#addFetch");
+  if (!feedUrl) { msg.textContent = "Enter a feed URL."; return; }
+  if (btn.disabled) return;            // guard against double-submit while in flight
+  btn.disabled = true;
+  msg.textContent = "Fetching…";
+  let preview;
+  try {
+    const res = await fetch("/api/podcasts", { method: "POST",
+      headers: { "content-type": "application/json" }, body: JSON.stringify({ feedUrl }) });
+    preview = await res.json();
+    if (!res.ok) throw new Error(preview.error || "fetch failed");
+  } catch (e) { msg.textContent = "Couldn't add feed: " + e.message; btn.disabled = false; return; }
+  openSheet(`
+    <h2 class="sheet-title">${esc(preview.name)}</h2>
+    <p class="add-msg">${preview.episodeCount} episodes. How should episodes be grouped?</p>
+    <button class="sheet-row" id="gFlat"><b>Flat</b> — one chronological list</button>
+    <button class="sheet-row" id="gSeries"><b>Series</b> — group by title/series (like Qalam)</button>`);
+  const finish = async (mode) => {
+    if (mode === "series") await fetch(`/api/podcasts/${preview.id}`, { method: "PATCH",
+      headers: { "content-type": "application/json" }, body: JSON.stringify({ mode: "series" }) });
+    closeSheet(); goTab("library"); await load(true);
+  };
+  $("#gFlat").addEventListener("click", () => finish("flat"));
+  $("#gSeries").addEventListener("click", () => finish("series"));
+}
 
 // ---------- helpers ----------
 function esc(s = "") {
