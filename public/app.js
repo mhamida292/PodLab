@@ -52,7 +52,82 @@ $$(".tab,.nav-item").forEach((el) => el.addEventListener("click", () => goTab(el
 backBtn.addEventListener("click", back);
 
 // ---------- view stubs (filled in later tasks) ----------
-function renderHome() { view.innerHTML = `<h1 class="view-title">Home</h1>`; }
+function renderHome() {
+  const playback = State.getAllPlayback();
+  const prog = Select.inProgress(DATA, playback);
+  const hero = prog[0];
+  const shelf = prog.slice(1);
+  const recent = Select.recentEpisodes(DATA, 20);
+
+  if (DATA.length === 0) {
+    view.innerHTML = `<div class="empty"><h2>No podcasts yet</h2>
+      <p>Head to Library to add your first feed.</p>
+      <button class="btn-accent" id="emptyAdd">+ Add podcast</button></div>`;
+    $("#emptyAdd").addEventListener("click", () => goTab("library"));
+    return;
+  }
+
+  const heroHtml = hero ? `
+    <button class="hero" data-id="${esc(hero.id)}">
+      <div class="hero-art" style="${artStyle(hero)}"></div>
+      <div class="hero-body">
+        <div class="mono hero-kicker">CONTINUE LISTENING</div>
+        <div class="hero-title">${esc(hero.title)}</div>
+        <div class="hero-pod">${esc(hero.podcast)}</div>
+        <div class="bar"><i style="width:${pct(hero)}%"></i></div>
+      </div>
+      <span class="hero-play">▶</span>
+    </button>` : "";
+
+  const shelfHtml = shelf.length ? `
+    <div class="shelf-h mono">CONTINUE</div>
+    <div class="shelf">${shelf.map((e) => `
+      <button class="shelf-item" data-id="${esc(e.id)}">
+        <div class="shelf-art" style="${artStyle(e)}"></div>
+        <div class="shelf-title">${esc(e.title)}</div>
+        <div class="shelf-pod">${esc(e.podcast)}</div>
+      </button>`).join("")}</div>` : "";
+
+  const recentHtml = recent.length ? `
+    <div class="shelf-h mono">RECENT EPISODES</div>
+    <div class="ep-list">${recent.map(epRow).join("")}</div>` : "";
+
+  view.innerHTML = heroHtml + shelfHtml + recentHtml;
+  wirePlayables();
+}
+
+// One-line episode row used by Home recent + show views.
+function epRow(e) {
+  const rec = State.getPlayback(e.id);
+  return `<button class="ep-row ${rec.played ? "played" : ""}" data-id="${esc(e.id)}">
+    <div class="ep-row-art" style="${artStyleById(e.podcastId)}"></div>
+    <div class="ep-row-main">
+      <div class="ep-row-title">${esc(e.title)}</div>
+      <div class="ep-row-sub">${esc(e.podcast)}${e.duration ? " · " + esc(e.duration) : ""}</div>
+    </div>
+    ${rec.played ? `<span class="badge">✓</span>` : ""}
+  </button>`;
+}
+
+// click any [data-id] element -> play that episode
+function wirePlayables() {
+  view.querySelectorAll("[data-id]").forEach((el) =>
+    el.addEventListener("click", () => play(findEp(el.dataset.id))));
+}
+
+// art helpers (use podcast image if present, else accent gradient)
+function artStyleById(podcastId) { const p = podcastById(podcastId); return artStyleFor(p?.image); }
+function artStyle(ep) { return artStyleById(ep.podcastId); }
+function artStyleFor(img) {
+  if (!img) return `background-image:linear-gradient(135deg,var(--accent),var(--accent-deep))`;
+  // Keep URL structure intact (encodeURI) but neutralize chars that could break
+  // out of the quoted CSS url(...) / the HTML style="" attribute (feed-controlled).
+  const safe = encodeURI(img).replace(/['"()\\]/g, encodeURIComponent);
+  return `background-image:url('${safe}')`;
+}
+function pct(ep) { const total = durToSec(ep.duration); const rec = State.getPlayback(ep.id);
+  return total && rec.position ? Math.min(100, (rec.position / total) * 100) : 0; }
+
 function renderLibrary() { view.innerHTML = `<h1 class="view-title">Library</h1>`; }
 function renderSearch() { view.innerHTML = `<h1 class="view-title">Search</h1>`; }
 function renderShow(id) { const p = podcastById(id); view.innerHTML = `<h1 class="view-title">${esc(p?.name || "")}</h1>`; }
