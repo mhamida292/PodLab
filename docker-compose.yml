@@ -6,7 +6,9 @@ services:
     restart: unless-stopped
     ports:
       - "9090:9090"
+    volumes:
+      - ./data:/app/data
     environment:
       - PORT=9090
-      # Override the feed without rebuilding, if you want:
-      # - FEED_URL=https://feeds.feedburner.com/QalamPodcast
+      # Podcast state (subscriptions + playback) persists to ./data/state.json.
+      # Add or remove podcasts at runtime in the app UI — no rebuild needed.
