@@ -55,10 +55,10 @@ async function podcastsPayload(store, force) {
   const { podcasts } = await store.getState();
   return Promise.all(
     podcasts.map(async (p) => {
-      const feed = await getPodcastFeed(p, { force }).catch(() => ({
-        series: [],
-        episodes: [],
-      }));
+      const feed = await getPodcastFeed(p, { force }).catch((err) => {
+        console.error(`[server] feed load failed for ${p.id}:`, err.message);
+        return { series: [], episodes: [] };
+      });
       return {
         id: p.id,
         name: p.name,
@@ -102,9 +102,13 @@ export function createApp({ store }) {
       const podMatch = pathname.match(/^\/api\/podcasts\/([^/]+)$/);
       if (podMatch && req.method === "PATCH") {
         const { mode } = await readBody(req);
+        if (mode !== "flat" && mode !== "series") {
+          return sendJson(res, 400, { error: "mode must be flat or series" });
+        }
         const p = await store.setPodcastMode(podMatch[1], mode);
+        if (!p) return sendJson(res, 404, { error: "not found" });
         dropCache(podMatch[1]); // mode change => recategorize on next fetch
-        return sendJson(res, 200, p || { error: "not found" });
+        return sendJson(res, 200, p);
       }
       if (podMatch && req.method === "DELETE") {
         await store.removePodcast(podMatch[1]);

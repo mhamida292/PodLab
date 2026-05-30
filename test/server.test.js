@@ -65,17 +65,21 @@ test("PUT and GET /api/state round-trips with last-write-wins", async () => {
 });
 
 test("POST with a failing feed returns 4xx", async () => {
-  const realFetch = globalThis.fetch;
-  globalThis.fetch = async (url, opts) => {
-    if (typeof url === "string" && url.startsWith("http://127.0.0.1")) {
-      return realFetch(url, opts);
-    }
-    return new Response("nope", { status: 404 });
-  };
-  const res = await fetch(`${base}/api/podcasts`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ feedUrl: "https://bad/rss" }),
-  });
-  assert.equal(res.status, 400);
+  const savedFetch = globalThis.fetch;
+  try {
+    globalThis.fetch = async (url, opts) => {
+      if (typeof url === "string" && url.startsWith("http://127.0.0.1")) {
+        return savedFetch(url, opts);
+      }
+      return new Response("nope", { status: 404 });
+    };
+    const res = await fetch(`${base}/api/podcasts`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ feedUrl: "https://bad/rss" }),
+    });
+    assert.equal(res.status, 400);
+  } finally {
+    globalThis.fetch = savedFetch;
+  }
 });
